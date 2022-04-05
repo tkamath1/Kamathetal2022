@@ -10,14 +10,17 @@
 
 ## Code
 
-Analyses/
+Analyses/[^1]
 
 Main_Figs/
 
 Auxiliary_scripts/
 
 ## Data
-All digital gene expression matrices have been made available via GEO at: 
+All digital gene expression matrices generated from this study have been made publicly available via GEO at: [GSE178265](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE178265)[^2]
+
+[^1]: There are many intermediate files that are used within these scripts. I've made an attempt at linking how to create each one in the scripts but please contact if you are having a hard time figuring out where each intermediate was generated from.
+[^2]: NB: Metadata is listed within each sample in GEO. It's a bit easier to parse the sample metadata from Broad's SCP
 
 In addition, all processed gene expression matrices, UMAP coordinates, sample metadata, and cell type annotations have been made publicly available via Broad's Single Cell Portal:
 
@@ -25,4 +28,3 @@ SCP link 1:
 
 
 SCP link 2:
-
