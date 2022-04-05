@@ -28,3 +28,8 @@ SCP link 1:
 
 
 SCP link 2:
+
+## Acknowledgements
+This work was supported by the following funding sources: National Institutes of Health F30AG069446-01 (TK), National Institutes of Health DP2AG058488 (E.Z.M.), National Institutes of Health U01MH124602 (E.Z.M.), Chan Zuckerberg Initiative 2017-175259 (E.Z.M.).
+
+In addition, we would like to thank Djordje Gveric (Multiple Sclerosis and Parkinson's Tissue Bank), Randall Woltjer (Oregon Health and Sciences University), and Rashed Nagra (Human Brain and Spinal Fluid Resource Center) for their contributions of postmortem tissue. We thank the NIH NeuroBioBank for facilitating the acquisition of postmortem brain tissue samples. We also thank Nicole Shultz and David Fitzpatrick (Max Planck Florida Institute for Neuroscience) for their donation of tree shrew brains. 
