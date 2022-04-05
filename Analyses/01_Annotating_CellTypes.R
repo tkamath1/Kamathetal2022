@@ -984,3 +984,323 @@ save(.ArgList,file=paste0("~/data/data/SN2020/ArgList_","sn_opc_indScaling_HVG",
 .myThirdStepFn()
 .myForthStepFn()
 
+############################################
+## Annotation of non-neuronal cell types ###
+############################################
+library(devtools)
+#install_github("MacoskoLab/liger", ref = "online")
+source("/home/tkamath/scripts/SeuratExtrafunctions.R")
+source("/home/tkamath/scripts/extrafuncs.R")
+source("/home/tkamath/scripts/prestowrapper.R")
+#library(Seurat)
+library(rliger)
+library(Matrix)
+library(Seurat)
+library("tidyverse")
+library(qs)
+paths = list.files(path="/home/tkamath/DA/SN2020_selected/",pattern = "*indScaling",full.names = T)
+
+objs=lapply(paths,function(q){
+  make.seurat(qread(paste0(q,"/data.qs")))
+})
+objs = lapply(objs,NormalizeData)
+names(objs)= c("astro","endo","mg",'neurons',"olig","opc")
+
+#### Astros
+setwd('/home/tkamath/DA/astro/')
+levels.use = levels(objs$astro@ident)[which(table(objs$astro@ident)>3)]
+markers.astro <- prestowrapper(objs$astro,all.clusters = T,one.sided = T)
+pdf('tsne.pdf')
+DimPlot(objs$astro, pt.size = 0.5,reduction.use = 'umap',do.label = T,no.legend = T)
+dev.off()
+markers.astro <- split(markers.astro,f = markers.astro$group)
+View(markers.astro$`3`)
+FeaturePlot(objs$astro, features = "ZBBX",reduction.use = 'umap',pt.size = 0.5)
+
+m = prestowrapper(objs$astro,ident.1 = 0,ident.2 = 2)
+m2 = prestowrapper(objs$astro,ident.1 = 8,ident.2 = 9)
+View(m2[m2$group == 'ident.1',])
+
+# 0,2,3 - Astro_GJB6_OXTR
+# 1 - Astro_CYP4F12
+# 6 - Astro_GUCY1A2
+# 7 - Astro_SIDT1
+# 8 - Astro_GLYATL2
+# 9 - Astro_VIM_TNFSRF12A
+# 11 - Astro_SERPINA3
+# 13 - Astro_GBP2_SPOCD1
+# 14 - Astro_VIM_LHX2
+# 15 - Ependyma_ZBBX
+
+# 4 - REMOVE, oligo doublet
+# 5- REMOVE, MT genes
+# 12 - REMOVE mg doublet
+# 10 -REMOVE neuron doublet
+# 16 - REMOVE neuron doublet
+# 17 - REMOVE OPC doublet
+
+objs$astro <- SubsetData(objs$astro,ident.remove = c(4,5,12,10,16,17))
+levels(objs$astro@ident) = c("Astro_GJB6_OXTR",'Astro_CYP4F12','Astro_GJB6_OXTR','Astro_GJB6_OXTR',
+                             'Astro_GUCY1A2','Astro_SIDT1','Astro_GLYATL2','Astro_VIM_TNFSRF12A',
+                             'Astro_SERPINA3','Astro_GBP2_SPOCD1','Astro_VIM_LHX2','Ependyma_ZBBX')
+objs$astro <- RunUMAP(objs$astro,reduction.use = 'hpca',dims.use = c(1:30))
+
+pdf('tsne_annot.pdf')
+DimPlot(objs$astro, label = TRUE, pt.size = 0.5,reduction.use = 'umap',
+        do.label = T,no.legend = T,label.size = 4)
+dev.off()
+astro.annotated <- objs$astro
+
+qsave(astro.annotated,file = "/home/tkamath/DA/SN2020_selected/astro_full_annotated.qs")
+
+
+##### Endos
+setwd('/home/tkamath/DA/endofibro/')
+levels.use = levels(objs$endo@ident)[which(table(objs$endo@ident)>3)]
+markers.endo <- prestowrapper(objs$endo,all.clusters = T,one.sided = T)
+View(markers.endo$`8`)
+
+pdf('tsne.pdf')
+DimPlot(objs$endo, pt.size = 0.5,reduction.use = 'umap',do.label = T,no.legend = T)
+DimPlot(objs$endo, pt.size = 0.5,reduction.use = 'umap',group.by = 'subject')
+dev.off()
+
+FeaturePlot(objs$endo, features = "ABCC9",reduction.use = 'umap',pt.size = 0.5)
+
+# Endos:
+# 0,3,14 - Endo_DCN_ABCC9
+# 1 - Endo_COL6A3
+# 2,5,8 - Endo_IL27RA
+# 4 - Endo_NOTCH3_PLK2
+# 6 - Endo_SNTG2
+# 7 - Endo_SLIT3
+# 13 - Endo_MET
+
+# 9 - Oligo doublet, REMOVE
+# 10 - Neuron doublet, REMOVE
+# 11 - MG doublet, REMOVE
+# 12 - MG doublet, REMOVE
+# 15 - Astro doublet, REMOVE
+# 16 - Astro doublet, REMOVE
+
+objs$endo <- SubsetData(objs$endo,ident.remove = c(9,10,11,12,15,16))
+endo.annotated <- objs$endo
+levels(endo.annotated@ident) <- c('Endo_DCN_ABCC9','Endo_COL6A3','Endo_IL27RA','Endo_DCN_ABCC9',
+                                  'Endo_NOTCH3_PLK2','Endo_IL27RA','Endo_SNTG2','Endo_SLIT3',
+                                  'Endo_IL27RA','Endo_MET','Endo_DCN_ABCC9')
+
+endo.annotated <- RunUMAP(endo.annotated,reduction.use = 'hpca',dims.use = c(1:30))
+
+pdf('tsne_annot.pdf')
+DimPlot(endo.annotated, label = TRUE, pt.size = 0.5,reduction.use = 'umap',
+        do.label = T,no.legend = T,label.size = 4)
+dev.off()
+
+qsave(endo.annotated,file = "/home/tkamath/DA/SN2020_selected/SN_endo_indScaling/endo_full_annotated.qs")
+
+##### MG
+setwd('/home/tkamath/DA/mg/')
+levels.use = levels(objs$mg@ident)[which(table(objs$mg@ident)>3)]
+markers.mg <- prestowrapper(objs$mg,all.clusters = T,one.sided = T)
+markers.mg <- split(markers.mg,f = markers.mg$group)
+View(markers.mg$`8`)
+
+pdf('tsne.pdf')
+DimPlot(objs$mg, pt.size = 0.5,reduction.use = 'umap',do.label = T,no.legend = T)
+DimPlot(objs$mg, pt.size = 0.5,reduction.use = 'umap',group.by = 'dataset')
+dev.off()
+
+objs$mg <- AddMito(objs$mg,species = 'human')
+
+FeaturePlot(objs$mg,features.plot = 'percent.mito',reduction.use = 'umap',
+            pt.size = 0.5,no.legend = F)
+FeaturePlot(mg.annotated,features.plot = 'IL15',reduction.use = 'umap',pt.size = 0.5)
+
+mg.annotated@meta.data <- mg.annotated@meta.data %>% mutate(nurr = ifelse(grepl('DAPI',seq_batch),'DAPI','Nurr'))
+DimPlot(mg.annotated, pt.size = 0.5,reduction.use = 'umap',do.label = T,no.legend = T)
+DimPlot(mg.annotated, pt.size = 0.5,reduction.use = 'umap',group.by = 'subject')
+
+m2 <- prestowrapper(mg.annotated,ident.1 = 6,ident.2 = c(1),one.sided = T)
+
+m3 <- prestowrapper(mg.annotated,ident.1 = 11,ident.2 = c(20),one.sided = T)
+
+# 0 - MG_CECR2_FGL1
+# 1,7 - MG_TSPO_VIM
+# 2 - MG_OPRM1
+# 5 - MG_GPNMB_SULT1C2
+# 6 - MG_GPNMB_SUSD1
+# 8 - MG_SPON1... check this
+# 9 - Macro_CD200R1
+# 10 - MG_LPL
+# 11 - MG_FOS
+# 14 - RP genes
+# 15 - MG_MGAM
+# 16 - REMOVE
+# 18 - REMOVE
+# 19 - MG_CCL3
+# 20 - MG_FOSL2
+# 21 - MG_MKI67
+
+# 3 - High MT, REEMOVE
+# 4 - Oligo, REMOVE
+# 12,13 - Neuron, REMOVE
+# 17 - Astrocyte, REMOVE
+# 22 - T-cell, REMOVE
+# 23 - Endo, REMOVE
+
+mg.annotated <- SubsetData(objs$mg,ident.remove = c(3,4,12,13,17,22,23))
+mg.annotated <- RunUMAP(mg.annotated,reduction.use = 'hpca',dims.use = c(1:30))
+
+DimPlot(mg.annotated, pt.size = 0.5,reduction.use = 'umap',do.label = T,no.legend = T)
+
+mg.annotated <- SubsetData(mg.annotated,ident.remove = c(14,16,18))
+
+levels(mg.annotated@ident) <- c('MG_CECR2_FGL1','MG_TSPO_VIM','MG_OPRM1','MG_GPNMB_SULT1C2','MG_GPNMB_SUSD1',
+                                'MG_TSPO_VIM','MG_SPON1','Macro_CD200R1','MG_GPNMB_LPL','MG_FOSL2',
+                                'MG_MGAM','MG_CCL3','MG_FOSL2','MG_MKI67')
+mg.annotated <- RunUMAP(mg.annotated,reduction.use = 'hpca',dims.use = c(1:30))
+
+DimPlot(mg.annotated, pt.size = 0.5,reduction.use = 'umap',do.label = T,no.legend = T)
+
+qsave(mg.annotated,'/home/tkamath/DA/SN2020_selected/SN_mg_indScaling/mg_full_annotated.qs')
+
+##### Neurons
+sn.nonda<- qread('/home/tkamath/DA/SN2020_selected/solution1/NonDANEuron_AnnotatedSeurat.qs')
+head(sn.nonda@meta.data)
+ident.use <- sn.nonda@active.ident[which(sn.nonda@active.ident != 'REMOVE')]
+
+sn.nonda.use<- qread('/home/tkamath/DA/SN2020_selected/solution1/data.qs')
+sn.nonda.seurat <- CreateSeuratObject(raw.data = sn.nonda.use$countData,project = "SeuratProject",
+                                      assay = "RNA",
+                                      min.cells = 0,
+                                      min.features = 0,
+                                      names.field = 1,
+                                      names.delim = "-",
+                                      meta.data = sn.nonda.use$pdata)
+sn.nonda.seurat = SetDimReduction(object=sn.nonda.seurat,reduction.type='umap',
+                                  slot='cell.embeddings',new.data = as.matrix(sn.nonda@meta.data[,c('UMAP_1','UMAP_2')]))
+sn.nonda.seurat = SetDimReduction(sn.nonda.seurat,reduction.type='umap',slot='key',new.data = 'UMAP_')
+
+hpca.obj<-new(Class="dim.reduction",
+              cell.embeddings=sn.nonda.use$embedding,key="HPCA",misc=list("raw" = sn.nonda.use$embedding))
+colnames(hpca.obj@cell.embeddings) = paste0("Factor",1:ncol(sn.nonda.use$embedding))
+sn.nonda.seurat@dr$hpca <- hpca.obj
+
+sn.nonda.seurat <- SubsetData(sn.nonda.seurat,cells.use = names(ident.use))
+sn.nonda.seurat@ident <- ident.use
+sn.nonda.seurat <- SubsetData(sn.nonda.seurat,cells.use = names(ident.use),subset.raw = T)
+#sn.nonda.seurat <-RunUMAP(sn.nonda.seurat,reduction.use = 'hpca',dims.use = c(1:30))
+
+pdf('/home/tkamath/DA/nonda/tsne_annot.pdf')
+DimPlot(sn.nonda.seurat,reduction.use = 'umap',do.label = T,no.legend = T)
+dev.off()
+
+qsave(sn.nonda.seurat,'/home/tkamath/DA/SN2020_selected/solution1/snnonda_full_annotated.qs')
+
+#######Olig
+setwd('/home/tkamath/DA/oligo/')
+levels.use = levels(objs$olig@ident)[which(table(objs$olig@ident)>3)]
+markers.olig <- prestowrapper(objs$olig,all.clusters = T,one.sided = T)
+
+m1 <- prestowrapper(objs$olig,ident.1 = c(0,3,4),one.sided = T)
+View(markers.olig[markers.olig$group == '14',])
+
+pdf('tsne.pdf')
+DimPlot(objs$olig, do.label = TRUE, pt.size = 0.5,reduction.use = 'umap')
+dev.off()
+
+FeaturePlot(objs$olig,features.plot = 'KCNAB1',reduction.use = 'umap',pt.size = 0.5)
+
+objs$olig <- AddMito(objs$olig,species = 'human')
+FeaturePlot(objs$olig,features.plot = 'PLXDC2',reduction.use = 'umap',pt.size = 0.5,no.legend = F)
+
+objs$olig <- SubsetData(objs$olig,ident.remove =  c(10,11))
+objs$olig <- RunUMAP(objs$olig,reduction.use = 'hpca',dims.use = c(1:30))
+
+olig.annotated <- SubsetData(objs$olig,ident.remove =  c(14))
+levels(olig.annotated@ident) <- c('Olig_PLXDC2','Olig_PLXDC2_SFRP1','Olig_PLXDC2_KCNAB1','Olig_PLXDC2_KCNK10','Olig_ENPP6_LUCAT1',
+                                  'Olig_PLXDC2_KCNAB1','Olig_PLXDC2_SFRP1','Olig_ENPP6_LUCAT1','Olig_PLXDC2_SFRP1','Olig_ENPP6_EMILIN2',
+                                  'Olig_ENPP6_ACTN2','Olig_ENPP6_EMILIN2')
+
+olig.annotated <- RunUMAP(olig.annotated,reduction.use = 'hpca',dims.use = c(1:30))
+pdf('tsne.pdf')
+DimPlot(olig.annotated, pt.size = 0.5,reduction.use = 'umap',do.label = T,no.legend = T)
+dev.off()
+
+#OLIGOS
+# 0 - PLXDC2
+# 1,4,6 - PLXDC2_SFRP1
+# 3,12 - PLXDC2_KCNAB1
+# 13 - PLXDC2_KCNK10
+
+# 2,5 - ENPP6_LUCAT1
+# 8 - ENPP6_ACTN2
+# 7,9 - ENPP6_EMILIN2
+
+# 10 - astro doublet
+# 11 - astro doublet
+# 14 - REMOVE
+
+qsave(olig.annotated,file = "/home/tkamath/DA/SN2020_selected/SN_olig_indScaling/olig_full_annotated.qs")
+
+
+### OPC
+levels.use = levels(objs$opc@ident)[which(table(objs$opc@ident)>3)]
+markers.opc <- prestowrapper(objs$opc,all.clusters = T,one.sided = T)
+View(markers.opc[markers.opc$group == 1,])
+
+DimPlot(objs$opc, do.label = TRUE, pt.size = 0.5,reduction.use = 'umap')
+FeaturePlot(opc.annotated, features ="CACNG4",reduction.use = 'umap')
+
+# 0 -all cacng4
+# 1 - 
+# 2 - 
+# 3- 
+# 4 - 
+# 5 - 
+# 8 - OPC_HOXD3
+# 9 - OPC_KIAA0040
+# 10 - OPC_ADM
+# 16 - OPC_MDFI
+
+# 6 - REMOVE, mature oligo
+# 7 - REMOVE
+# 11 - REEMOVE
+# 12 - REMOVE
+# 13 - Neeuron doublet, remove
+# 14 - MG doublet, remove
+# 15- astro doublet remove
+# 17 - REMOVE
+
+
+opc.annotated <- SubsetData(objs$opc,ident.remove = c(6,7,11,12,13,14,15,17))
+opc.annotated <- RunUMAP(opc.annotated,reduction.use = 'hpca',dims.use = c(1:30))
+DimPlot(opc.annotated, do.label = TRUE, pt.size = 0.5,reduction.use = 'umap')
+
+levels(opc.annotated@ident) <- c('OPC_CACNG4','OPC_CACNG4','OPC_CACNG4','OPC_CACNG4','OPC_CACNG4',
+                                 'OPC_CACNG4','OPC_HOXD3','OPC_KIAA0040','OPC_ADM','OPC_MDFI')
+qsave(opc.annotated,'/home/tkamath/DA/SN2020_selected/SN_opc_indScaling/opc_full_annotated.qs')
+
+
+make.seurat<-function(data){
+  nbt=Seurat::CreateSeuratObject(raw.data=data$countData,
+                                 project = "SeuratProject",
+                                 min.cells = 0,
+                                 min.features = 0,
+                                 names.field = 1,
+                                 names.delim = "-",
+                                 meta.data = data$pdata)
+  nbt@ident <- data$pdata$anno_cluster_res
+  names(nbt@ident) <- rownames(data$pdata)
+  nbt = SetDimReduction(object=nbt,reduction.type='umap',
+                        slot='cell.embeddings',new.data = as.matrix(data$pdata[,c('UMAP_1','UMAP_2')]))
+  nbt = SetDimReduction(nbt,reduction.type='umap',slot='key',new.data = 'UMAP_')
+  
+  hpca.obj<-new(Class="dim.reduction",
+                cell.embeddings=data$embedding,key="HPCA",misc=list("raw" = data$embedding))
+  colnames(hpca.obj@cell.embeddings) = paste0("Factor",1:ncol(data$embedding))
+  nbt@dr$hpca <- hpca.obj
+  
+  return(nbt)
+}
+
