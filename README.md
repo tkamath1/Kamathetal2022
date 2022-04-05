@@ -1,12 +1,12 @@
 # Kamathetal2022
 ## Code used to generate analyses and reproduce main figures for Kamath et al., 2022 Nature Neuro
 
-### Kamath*,Abdulraouf* et al., 2022 Single-cell genomic profiling of human dopamine neurons identifies a population that selectively degenerates in Parkinson’s disease (_Nature Neuroscience_)
+### Single-cell genomic profiling of human dopamine neurons identifies a population that selectively degenerates in Parkinson’s disease (_Nature Neuroscience_, 2022)
 #### Tushar V. Kamath<sup>1,2</sup>, Abdulraouf Abdulraouf, SJ Burris, Jonah Langlieb<sup>1</sup>, Vahid Gazestani<sup>1</sup>, Naeem Nadaf, Karol Balderrama, Charles Vanderburg, Evan Z. Macosko
 
-<sup>1</sup> Performed analysis
+<sup>1 -  Performed analysis</sup>
 
-<sup>2</sup> Analysis code contact: tkamath@broadinstitute.org
+<sup>2 - Analysis and project lead (contact: tkamath@broadinstitute.org)</sup> 
 
 ## Code
 
