@@ -34,7 +34,7 @@ SCP link 2 (Slide-seq data): https://singlecell.broadinstitute.org/single_cell/s
 
 Q: Where is the metadata?
 
-A: The easiest place to access the metadata associated with each patient and animal is in the metadata .tsv file hosted on Broad SCP. GEO also has metadata associated with each sample in the sample landing page (but you will need to navigate/scrape across each individual sample page to gather them).
+A: The easiest place to access the metadata associated with each postmortem human donor and animal is in the metadata .tsv file hosted on Broad SCP. GEO also has metadata associated with each sample in the individual sample landing pages (all listed within the main GEO link, but you will need to navigate/scrape across each individual sample page to gather them together).
 
 Q: Why are there two macaque datasets?
 
