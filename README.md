@@ -29,7 +29,8 @@ SCP link 1 (single-nuc RNA-seq data): https://singlecell.broadinstitute.org/sing
 
 SCP link 2 (Slide-seq data): https://singlecell.broadinstitute.org/single_cell/study/SCP1769/
 
-## FAQs [^3]: This section will be periodically updated based on the correspondences received about this work.
+## FAQs 
+[^3]: This section will be periodically updated based on the correspondences received about this work.
 Q: Where is the metadata?
 
 A: The easiest place to access the metadata associated with each patient and animal is in the metadata .tsv file hosted on Broad SCP. GEO also has metadata associated with each sample in the sample landing page (but you will need to navigate/scrape across each individual sample page to gather them).
