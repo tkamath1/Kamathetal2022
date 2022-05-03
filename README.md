@@ -36,7 +36,7 @@ A: The easiest place to access the metadata associated with each patient and ani
 
 Q: Why are there two macaque datasets?
 
-A: We generated Nurr-enriched DA neuron profiles from macaque (M. mulatta) for our preprint. Since our preprint release, we received high-quality fresh-preserved macaque (M. fascicularis) midbrain specimens which was to generate snRNA-seq profiles of DA neurons in the final version of the paper. The M. fascicularis data was used for species integration, defining subtypes in the macaque, and Slide-seq.
+A: We generated Nurr-enriched DA neuron profiles from macaque (M. mulatta) for our preprint. Since our preprint release, we received higher-quality freshly perfused and well-preserved macaque (M. fascicularis) midbrain specimens. These specimens were used to generate snRNA-seq profiles of DA neurons in the final version of the paper. The M. fascicularis snRNA-seq data was used for species integration, defining subtypes in the macaque, and Slide-seq in the final version of the paper.
 
 ## Acknowledgements
 This work was supported by the following funding sources: National Institutes of Health F30AG069446-01 (TK), National Institutes of Health DP2AG058488 (E.Z.M.), National Institutes of Health U01MH124602 (E.Z.M.), Chan Zuckerberg Initiative 2017-175259 (E.Z.M.).
