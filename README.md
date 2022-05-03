@@ -29,6 +29,13 @@ SCP link 1 (single-nuc RNA-seq data): https://singlecell.broadinstitute.org/sing
 
 SCP link 2 (Slide-seq data): https://singlecell.broadinstitute.org/single_cell/study/SCP1769/
 
+## FAQs
+Q: Where is the metadata?
+A: The easiest place to access the metadata associated with each patient and animal is in the metadata .tsv file hosted on Broad SCP. GEO also has metadata associated with each sample in the sample landing page (but you will need to navigate/scrape across each individual sample page to gather them).
+
+Q: Why are there two macaque datasets?
+A: We generated Nurr-enriched DA neuron profiles from macaque (M. mulatta) for our preprint. Since our preprint release, we received and generated data from high-quality fresh-preserved macaque (M. fascicularis) midbrain specimens which was used in the final paper for species integration, defining subtypes in the macaque, and Slide-seq.
+
 ## Acknowledgements
 This work was supported by the following funding sources: National Institutes of Health F30AG069446-01 (TK), National Institutes of Health DP2AG058488 (E.Z.M.), National Institutes of Health U01MH124602 (E.Z.M.), Chan Zuckerberg Initiative 2017-175259 (E.Z.M.).
 
