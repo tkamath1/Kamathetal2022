@@ -29,8 +29,7 @@ SCP link 1 (single-nuc RNA-seq data): https://singlecell.broadinstitute.org/sing
 
 SCP link 2 (Slide-seq data): https://singlecell.broadinstitute.org/single_cell/study/SCP1769/
 
-## FAQs 
-[^3]
+## FAQs [^3]
 [^3]: This section will be periodically updated based on the correspondences received about this work.
 Q: Where is the metadata?
 
