@@ -16,6 +16,7 @@ base.dir <- c('/home/tkamath/DA/figures/suppfigures/')
 ##################################################
 ################## SUPP FIGURE 2 #################
 ##################################################
+
 ###################
 ## 2A #############
 ###################
@@ -43,20 +44,151 @@ ggplot(list.df, aes(x = L1, y = value,fill = L1)) +
 dev.off()
 
 
+##############################
+#### Ex Data 2B ##############
+##############################
+sn.da.annot <- qread('/home/tkamath/DA/da/sn_da_annot_021821.qs')
+idx.ctrl <- rownames(sn.da.annot@cell.data[which(sn.da.annot@cell.data$status == 'Ctrl'),])
+sn.da.ctrl <- subsetLiger(sn.da.annot,cells.use = idx.ctrl,remove.missing = F)
+Hs_norm <- sn.da.ctrl@H.norm
+W_mat <- sn.da.ctrl@W
+factors.use <- list('CALB1/TRHR' = 1,
+                    'SOX6/DDT' = 2,
+                    'CALB1/RBP4' = 6,
+                    'CALB1/PPP1R17' = 8,
+                    'CALB1/CRYM/CCDC68' = 9,
+                    'SOX6/PART1' = 10,
+                    'SOX6/GFRA2' = 12,
+                    'CALB1/GEM' = 15,
+                    'SOX6/AGTR1' = 16,
+                    'CALB1/CALCR' = 19)
+factors.use <- factors.use[c(9,2,6,7,5,10,3,4,1,8)]
+tsne.colors <- c('lemonchiffon', 'red')
+p.list <- lapply(names(factors.use),function(z){
+  idx.use <- which(names(factors.use) == z)
+  tsne_df <- data.frame(Hs_norm[, factors.use[[z]] ], sn.da.ctrl@tsne.coords)
+  factorlab <- paste0("Factor", idx.use)
+  colnames(tsne_df) <- c(factorlab, "UMAP1", "UMAP2")
+  genes.plot <- sn.da.ctrl@var.genes[head(order(W_mat[factors.use[[z]],],decreasing = T),5)]
+  lab.use <- paste0('Factor', idx.use,': ',z,' -- \n',paste(genes.plot[1:2],collapse = ', '),'\n',
+                    paste(genes.plot[3:5],collapse = ', '))
+  #lab.use <- paste0(lab.use,paste(genes.plot[4:7],collapse = ', '),'\n')
+  #lab.use <- paste0(lab.use,paste(genes.plot[8:10],collapse = ', '))
+  p1 <- ggplot(tsne_df, aes_string(x = "UMAP1", y = "UMAP2", color = factorlab)) + 
+    geom_point_rast(size = 0.8) +
+    scale_color_gradient(low = tsne.colors[1], high = tsne.colors[2]) + 
+    ggtitle(label = lab.use)+ 
+    guides(color=guide_legend(title="Factor loading")) +
+    theme(axis.text = element_blank(),
+          axis.ticks = element_blank(),
+          axis.title = element_blank(),
+          axis.line = element_blank(),plot.title = element_text(hjust = 0.3,size = 20),
+          legend.title = element_blank())
+  return(p1)
+})
+
+pdf('/home/tkamath/DA/figures/suppfigures/suppfig2/inmffactors.pdf',useDingbats = F,
+    width = 10*128/50,height = 10)
+grid.arrange(p.list[[1]],p.list[[2]],p.list[[3]],p.list[[4]],p.list[[5]],
+             p.list[[6]],p.list[[7]],p.list[[8]],p.list[[9]],p.list[[10]],nrow = 2)
+dev.off()
+
+pdf_convert('inmffactors.pdf',format = 'png',dpi = 500)
+
+
+##############################
+#### Ex Data 2C ##############
+##############################
+files.use <- grep('mastDE_.*(CALB1|SOX6)',list.files('/home/tkamath/DA/gwas/genesets/subtypes/'),
+                  value = T)
+files.use <- files.use[c(c(1:6,9:12))]
+out.mast <- lapply(files.use,function(x){
+  qread(paste0('/home/tkamath/DA/gwas/genesets/subtypes/',x))
+})
+names(out.mast) <- as.vector(unlist(lapply(lapply(strsplit(files.use,'_'),
+                                                  function(x){paste0(x[[2]],"_",x[[3]])}),function(x){
+                                                    sapply(strsplit(x,'\\.'),`[`,1)})))
+source('/home/tkamath/scripts/genevalidatehelper.R')
+da.mast <- CombineMAST(out.mast,component.pvalue.use = 'H',component.coef.use = 'D',
+                       correction = 'fdr',contrast.use = 'clusteruse1')
+da.mast.use <- lapply(da.mast,function(x){x[x$fdr < 0.05 & x$coef > 0,]})
+genes.mast.use <- lapply(da.mast.use,function(x){
+  x[order(x$z, decreasing = T)[c(1:min(nrow(x),3500)) ],]
+})
+
+library(UpSetR)
+pdf('/home/tkamath/DA/figures/suppfigures/suppfig3/upsetplot_dasubtypes.pdf',useDingbats = F)
+upset(fromList(genes.mast.use),nsets = 10,nintersects = 10)
+dev.off()
+
+OUT <- createWorkbook()
+lapply(names(genes.mast.use),function(x){
+  addWorksheet(OUT, x)
+  writeData(OUT, sheet = x,x = genes.mast.use[[x]])
+})
+
+saveWorkbook(OUT, "~/DA/figures/suppfigures/supptable_dagenes.xls")
+
+
+##############################
+#### Ex Data 2D ##############
+##############################
+sn.da.annot <- qread('/home/tkamath/DA/da/sn_da_annot_021821.qs')
+idx.ctrl <- rownames(sn.da.annot@cell.data[which(sn.da.annot@cell.data$status == 'Ctrl'),])
+sn.da.ctrl <- subsetLiger(sn.da.annot,cells.use = idx.ctrl,remove.missing = F)
+p1 <-plotByDatasetAndCluster(sn.da.ctrl,return.plots = T,do.shuffle = T,pt.size = 0.5)
+p1[[1]]$labels$colour <- 'Donor ID'
+setwd('~/DA/figures/suppfigures/suppfig2/')
+pdf('tsne_da_byindiv.pdf',useDingbats = F)
+p1[[1]]+ geom_point_rast() + theme(axis.text = element_blank(),
+                                   axis.title = element_blank(),
+                                   axis.ticks = element_blank(),
+                                   axis.line = element_blank()) + theme(legend.position = c(0.8, 0.8))
+dev.off()
+pdf_convert('tsne_da_byindiv.pdf',format = 'png',dpi = 500)
+
+#############################
+#### Extended Data Fig 2E ###
+#############################
+sn.da.ctrl.seurat <- ligerToSeurat(sn.da.ctrl)
+# Plot markers 
+marker.genes <- c('PBX1','PITX3','BNC2','SLC6A3','KCNJ6','LMO3','ALDH1A1')
+p.use <- lapply(marker.genes,function(x){
+  p1 <- VlnPlot(sn.da.ctrl.seurat,features.plot = x,x.lab.rot = T,point.size.use = 0,do.return = T)
+  p1$data$ident <- factor(p1$data$ident,levels = c('SOX6_AGTR1','SOX6_PART1','SOX6_DDT','SOX6_GFRA2',
+                                                   'CALB1_CALCR','CALB1_CRYM_CCDC68','CALB1_PPP1R17',
+                                                   'CALB1_RBP4','CALB1_GEM','CALB1_TRHR'))
+  mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(10)
+  p1 + scale_fill_manual(values = mycolors) + theme(axis.title.x = element_blank(),axis.title.y =
+                                                      element_text(color = 'black',face = 'italic')) +
+    ylab(as.character(x)) +ggtitle('')
+})
+pdf('~/DA/figures/suppfigures/suppfig2/violinplots_DAothermarkers.pdf',
+    useDingbats = F,width = 25,height = 15)
+do.call('grid.arrange',p.use)
+dev.off()
+
+
+#############################
+#### Ex Fig 2F ##############
+#############################
 
 # Supp figure sox6/calb1 ratios
 sn.da.ctrl@cell.data$sox6 <- rep('sox6',nrow(sn.da.ctrl@cell.data))
 sn.da.ctrl@cell.data[which(grepl('CALB1',sn.da.ctrl@clusters)),]$sox6 <- 'calb1'
-t1 <- table(sn.da.ctrl@cell.data$dataset,sn.da.ctrl@clusters)
+t1 <- table(sn.da.ctrl@cell.data$dataset,sn.da.ctrl@cell.data$sox6)
 t2 <- as.data.frame(melt(t1/rowSums(t1)))
 t2$Var1 <- as.factor(t2$Var1)
-ggplot(t2, aes(fill=Var1, y=value, x=Var2)) + 
-  geom_bar(position="fill", stat="identity")
+levels(t2$Var2) <- c('CALB1+','SOX6+')
+pdf('suppfig2/sox6proportions.pdf',useDingbats = F)
+ggplot(t2, aes(fill=Var2, y=value, x=Var2)) + 
+  geom_boxplot(alpha = 0.2) + geom_jitter(width = 0.2) +
+  theme(legend.position = 'none') + xlab('Broad DA subtype') + ylab('Proportion per individual') 
+dev.off()
 
-
-sn.da.annot <- qread('/home/tkamath/DA/da/sn_da_annot_021821.qs')
-idx.ctrl <- rownames(sn.da.annot@cell.data[which(sn.da.annot@cell.data$status == 'Ctrl'),])
-sn.da.ctrl <- subsetLiger(sn.da.annot,cells.use = idx.ctrl,remove.missing = F)
+#########################
+## Ex Fig 2G ############
+#########################
 p1 <-plotByDatasetAndCluster(sn.da.ctrl,return.plots = T,do.shuffle = T,pt.size = 0.5)
 p1[[1]]$labels$colour <- 'Donor ID'
 setwd('~/DA/figures/suppfigures/suppfig2/')
@@ -158,59 +290,4 @@ png('markergenes_dacalb1.png',res = 300,width = 8000,height = 1000)
 grid.arrange(p1[[2]],p1[[3]],p1[[4]],p1[[5]],p1[[6]],p1[[7]],p1[[8]],p1[[1]],nrow = 1)
 dev.off()
 
-sn.da.ctrl@cell.data$sox6 <- rep('sox6',nrow(sn.da.ctrl@cell.data))
-sn.da.ctrl@cell.data[which(grepl('CALB1',sn.da.ctrl@clusters)),]$sox6 <- 'calb1'
-t1 <- table(sn.da.ctrl@cell.data$dataset,sn.da.ctrl@cell.data$sox6)
-t2 <- as.data.frame(melt(t1/rowSums(t1)))
-t2$Var1 <- as.factor(t2$Var1)
-levels(t2$Var2) <- c('CALB1+','SOX6+')
-pdf('suppfig2/sox6proportions.pdf',useDingbats = F)
-ggplot(t2, aes(fill=Var2, y=value, x=Var2)) + 
-  geom_boxplot(alpha = 0.2) + geom_jitter(width = 0.2) +
-  theme(legend.position = 'none') + xlab('Broad DA subtype') + ylab('Proportion per individual') 
-dev.off()
 
-Hs_norm <- sn.da.ctrl@H.norm
-W_mat <- sn.da.ctrl@W
-factors.use <- list('CALB1/TRHR' = 1,
-                    'SOX6/DDT' = 2,
-                    'CALB1/RBP4' = 6,
-                    'CALB1/PPP1R17' = 8,
-                    'CALB1/CRYM/CCDC68' = 9,
-                    'SOX6/PART1' = 10,
-                    'SOX6/GFRA2' = 12,
-                    'CALB1/GEM' = 15,
-                    'SOX6/AGTR1' = 16,
-                    'CALB1/CALCR' = 19)
-factors.use <- factors.use[c(9,2,6,7,5,10,3,4,1,8)]
-tsne.colors <- c('lemonchiffon', 'red')
-p.list <- lapply(names(factors.use),function(z){
-  idx.use <- which(names(factors.use) == z)
-  tsne_df <- data.frame(Hs_norm[, factors.use[[z]] ], sn.da.ctrl@tsne.coords)
-  factorlab <- paste0("Factor", idx.use)
-  colnames(tsne_df) <- c(factorlab, "UMAP1", "UMAP2")
-  genes.plot <- sn.da.ctrl@var.genes[head(order(W_mat[factors.use[[z]],],decreasing = T),5)]
-  lab.use <- paste0('Factor', idx.use,': ',z,' -- \n',paste(genes.plot[1:2],collapse = ', '),'\n',
-                    paste(genes.plot[3:5],collapse = ', '))
-  #lab.use <- paste0(lab.use,paste(genes.plot[4:7],collapse = ', '),'\n')
-  #lab.use <- paste0(lab.use,paste(genes.plot[8:10],collapse = ', '))
-  p1 <- ggplot(tsne_df, aes_string(x = "UMAP1", y = "UMAP2", color = factorlab)) + 
-    geom_point_rast(size = 0.8) +
-    scale_color_gradient(low = tsne.colors[1], high = tsne.colors[2]) + 
-    ggtitle(label = lab.use)+ 
-    guides(color=guide_legend(title="Factor loading")) +
-    theme(axis.text = element_blank(),
-          axis.ticks = element_blank(),
-          axis.title = element_blank(),
-          axis.line = element_blank(),plot.title = element_text(hjust = 0.3,size = 20),
-          legend.title = element_blank())
-  return(p1)
-})
-
-pdf('/home/tkamath/DA/figures/suppfigures/suppfig2/inmffactors.pdf',useDingbats = F,
-    width = 10*128/50,height = 10)
-grid.arrange(p.list[[1]],p.list[[2]],p.list[[3]],p.list[[4]],p.list[[5]],
-             p.list[[6]],p.list[[7]],p.list[[8]],p.list[[9]],p.list[[10]],nrow = 2)
-dev.off()
-
-pdf_convert('inmffactors.pdf',format = 'png',dpi = 500)
