@@ -151,3 +151,53 @@ species.proj.use@scale.data <- species.proj2@scale.data
 plotByDatasetAndCluster(species.proj.use)
 rliger::plotGene(species.proj.use, gene = "Fam83b",plot.by = 'none')
 qsave(species.proj.use,'/home/tkamath/DA/species/liger_species_0321.qs')
+
+sn.da.ctrl <- qread('/home/tkamath/DA/da/sn_da_ctrl_021821.qs')
+species.proj.use <- qread('/home/tkamath/DA/species/liger_species_091321.qs')
+
+dataset.list <- unique(sn.da.ctrl@cell.data$dataset)[c(1,6,7)]
+for (x in c(1:length(dataset.list))) {
+  idx.use <- rownames(sn.da.ctrl@cell.data[which(sn.da.ctrl@cell.data$dataset == dataset.list[x]),])
+  sn.individual <- rliger::subsetLiger(sn.da.ctrl,cells.use = idx.use,remove.missing = F)
+  rownames(sn.individual@raw.data[[1]]) <- firstupper(tolower(rownames(sn.individual@raw.data[[1]])))
+  sn.individual <- rliger::normalize(sn.individual)
+  sn.individual@var.genes <- species.proj.use@var.genes
+  genes.add <- setdiff(species.proj.use@var.genes,rownames(sn.individual@raw.data[[1]]))
+  matrix.add <- Matrix(matrix(0,nrow = length(genes.add),ncol = ncol(sn.individual@norm.data[[1]])),sparse = T)
+  rownames(matrix.add) <- genes.add
+  colnames(matrix.add) <- rownames(sn.individual@cell.data)
+  sn.individual@norm.data <- list(rbind(sn.individual@norm.data[[1]],matrix.add))
+  names(sn.individual@norm.data) <- as.character(x)
+  sn.individual <- scaleNotCenter(sn.individual)
+  sn.individual@cell.data$percent.mito <- NULL
+  lis.use <- list(sn.individual)
+  names(lis.use) <- dataset.list[x]
+  species.proj.use = online_iNMF(species.proj.use, X_new = lis.use,project = TRUE)
+}
+species.proj.use <- quantile_norm(species.proj.use,ref_dataset = 'human',eps = 0.1)
+species.proj.use <- louvainCluster(species.proj.use)
+species.proj.use = runUMAP(species.proj.use)
+
+
+# Remove: 24, 23,22,20,19,16
+rliger::plotGene(species.proj.use,gene = 'Calcr',plot.by = 'none')
+species.proj.use2 <- subsetLiger(species.proj.use,clusters.use = setdiff(levels(
+  species.proj.use@clusters),c(16,19,20,22,23,24)),remove.missing = F)
+species.proj.use2 <- louvainCluster(species.proj.use2,resolution = 1.2)
+species.proj.use2 = runUMAP(species.proj.use2)
+p1 <- rliger::plotByDatasetAndCluster(species.proj.use2,return.plots = T,pt.size = 0.1,do.shuffle = T)
+qsave(species.proj.use2,'liger_species_allfinal_091321.qs')
+rliger::plotGene(species.proj.use2,gene = 'Sox6',plot.by = 'none')
+species.proj.use2 <- subsetLiger(species.proj.use2,clusters.use = setdiff(levels(species.proj.use2@clusters),
+                                                                          c(11)))
+
+qsave(species.proj.use2,'liger_species_0914_allhumans.qs')
+
+t2 <- species.proj.annot2@cell.data %>% mutate(primate = ifelse(dataset %in% c('mouse','rat','treeshrew'),
+                                                                'non-primate','primate'))
+species.proj.annot2@cell.data <- t2
+t1 <- table(t2$primate,species.proj.annot2@clusters)
+df.use <- melt(t1/rowSums(t1))
+ggplot(df.use,aes(x = Var2, y = value, fill = Var1)) + geom_bar(position="fill", stat="identity")
+
+qsave(species.proj.annot2,'/home/tkamath/DA/species/liger_species_0914_annot.qs')
