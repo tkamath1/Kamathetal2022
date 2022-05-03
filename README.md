@@ -24,10 +24,10 @@ All digital gene expression matrices generated from this study have been made pu
 
 In addition, all processed gene expression matrices, UMAP coordinates, sample metadata, and cell type annotations have been made publicly available via Broad's Single Cell Portal:
 
-SCP link 1:
+SCP link 1 (single-nuc RNA-seq data): https://singlecell.broadinstitute.org/single_cell/study/SCP1768/
 
 
-SCP link 2:
+SCP link 2 (Slide-seq data): https://singlecell.broadinstitute.org/single_cell/study/SCP1769/
 
 ## Acknowledgements
 This work was supported by the following funding sources: National Institutes of Health F30AG069446-01 (TK), National Institutes of Health DP2AG058488 (E.Z.M.), National Institutes of Health U01MH124602 (E.Z.M.), Chan Zuckerberg Initiative 2017-175259 (E.Z.M.).
