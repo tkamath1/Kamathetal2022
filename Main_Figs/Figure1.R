@@ -213,6 +213,10 @@ p1[[1]]$data$Dataset <- factor(p1[[1]]$data$Dataset,levels = c('Human',
                                                                'Macaque',"Tree shrew",
                                                                'Rat','Mouse'))
 
+########################################
+### Figure 1 G/H #######################
+########################################
+
 pdf('/home/tkamath/DA/species/tsne_0914_2.pdf',useDingbats = F)
 p1[[1]] + scale_color_brewer(palette = 'Dark2') +
   theme(axis.text = element_blank(),
@@ -232,6 +236,7 @@ p1[[1]] +
         axis.line = element_blank())
 dev.off()
 
+
 liger.species3@cell.data <- liger.species3@cell.data %>% mutate(primate = ifelse(dataset %in% c('Mouse','Rat','Tree shrew'),'non-primate',
                                                                                  'primate'))
 t1 <- table(liger.species3@clusters,liger.species3@cell.data$primate)
@@ -247,7 +252,7 @@ dev.off()
 
 ##########################################
 ######### Fig 1I #########################
-###########################################
+##########################################
 # TF analysis
 to.plot.df <- qread('/home/tkamath/DA/tfanalysis/tf_toplot.qs')
 limit <- max(abs(to.plot.df$value)) * c(-1, 1)
