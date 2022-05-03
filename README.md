@@ -12,9 +12,11 @@
 
 Analyses/[^1]
 
+Auxiliary_scripts/
+
 Main_Figs/
 
-Auxiliary_scripts/
+ExtendedData_Figs/
 
 ## Data
 All raw, unaligned sequence-level data from human samples are available via dbGAP (requires formal request for access to ensure federal privacy concerns compliance): phs002879.v1.p1[^2]
