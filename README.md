@@ -10,13 +10,13 @@
 
 ## Code
 
-Analyses/[^1]
+Analyses/[^1] - Grouped by primary analyses performed for this paper
 
-Auxiliary_scripts/
+Auxiliary_scripts/ - A couple of extra scripts for helper functions
 
-Main_Figs/
+Main_Figs/ - code to generate main figure panels
 
-ExtendedData_Figs/
+ExtendedData_Figs/ - code to generate extended data/supp figure panels
 
 ## Data
 All raw, unaligned sequence-level data from human samples are available via dbGAP (requires formal request for access to ensure federal privacy concerns compliance): phs002879.v1.p1[^2]
